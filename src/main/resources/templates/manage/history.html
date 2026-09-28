@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>文章修订记录</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width workspace">
+  <a class="back-link" th:href="@{/manage}">← 返回工作台</a>
+  <section class="workspace-heading"><div><p class="eyebrow">REVISION HISTORY</p><h1 th:text="${article.title}">文章标题</h1><p class="muted">每次保存、送审、发布或退回都会留下完整内容快照。</p></div><span class="count-badge" th:text="${revisions.size()}">0</span></section>
+  <div class="revision-list" th:if="${!revisions.isEmpty()}">
+    <article class="panel revision-card" th:each="entry : ${revisions}">
+      <div class="revision-head"><div><span class="revision-number" th:text="'修订 ' + ${entry.revision.revisionNo}">修订 1</span><span class="status-pill" th:text="${@viewLabels.status(T(com.blogcms.domain.ArticleStatus).valueOf(entry.revision.status))}">草稿</span></div><time th:text="${#temporals.format(entry.revision.createdAt, 'yyyy-MM-dd HH:mm')}">时间</time></div>
+      <h2 th:text="${entry.revision.title}">标题</h2>
+      <p class="revision-note"><strong th:text="${entry.revision.changedBy.displayName}">修改者</strong><span th:text="${entry.revision.changeNote}">保存草稿</span></p>
+      <p class="article-summary" th:if="${!#strings.isEmpty(entry.revision.summary)}" th:text="${entry.revision.summary}">摘要</p>
+      <div class="markdown-body revision-body" th:utext="${entry.contentHtml}"></div>
+    </article>
+  </div>
+  <div class="empty-inline" th:if="${revisions.isEmpty()}">还没有修订记录。</div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

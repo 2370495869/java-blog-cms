@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<body>
+<header class="site-header" th:fragment="header">
+  <a class="brand" th:href="@{/}"><span class="brand-mark">墨</span><span th:text="${siteTitle}">墨页博客</span></a>
+  <nav class="main-nav" aria-label="主导航">
+    <a th:href="@{/}">文章</a>
+    <a th:if="${viewer == null}" th:href="@{/login}">作者入口</a>
+    <a th:if="${viewer != null}" th:href="@{/manage}">内容工作台</a>
+    <a th:if="${viewer != null and (viewer.roleName == 'EDITOR' or viewer.roleName == 'ADMIN')}" th:href="@{/manage/review}">审核队列</a>
+    <a th:if="${viewer != null and viewer.roleName == 'ADMIN'}" th:href="@{/manage/taxonomy}">分类与标签</a>
+    <a th:if="${viewer != null and viewer.roleName == 'ADMIN'}" th:href="@{/manage/users}">账号管理</a>
+  </nav>
+  <div class="account-nav" th:if="${viewer != null}">
+    <span class="account-name" th:text="${viewer.displayName}">用户</span>
+    <form th:action="@{/logout}" method="post"><button class="button button-quiet" type="submit">退出</button></form>
+  </div>
+</header>
+<div class="flash" th:fragment="flash" th:if="${message}" th:text="${message}">提示消息</div>
+<footer class="site-footer" th:fragment="footer">
+  <span>用心写作 · 认真审核 · 安心发布</span>
+</footer>
+</body>
+</html>

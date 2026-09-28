@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>账号管理</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width workspace">
+  <div th:replace="~{fragments/layout :: flash}"></div>
+  <section class="workspace-heading"><div><p class="eyebrow">TEAM ACCESS</p><h1>账号管理</h1><p class="muted">只为受信任的团队成员创建账号，并按需分配角色。</p></div></section>
+  <section class="panel user-create-panel">
+    <h2>创建账号</h2>
+    <form th:action="@{/manage/users}" method="post" th:object="${form}" class="user-form">
+      <label>登录名<input th:field="*{username}" minlength="3" maxlength="40" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,39}" required autocomplete="off" placeholder="例如 editor_01"></label>
+      <label>显示名称<input th:field="*{displayName}" maxlength="80" required placeholder="团队成员名称"></label>
+      <label>初始密码<input th:field="*{password}" type="password" minlength="12" maxlength="72" required autocomplete="new-password" placeholder="至少 12 个字符"></label>
+      <label>角色<select th:field="*{role}" required><option value="">选择角色</option><option th:each="role : ${roles}" th:value="${role}" th:text="${@viewLabels.role(role)}">作者</option></select></label>
+      <button class="button button-primary" type="submit">创建账号</button>
+    </form>
+  </section>
+  <section class="panel">
+    <div class="section-heading compact"><div><p class="eyebrow">TEAM</p><h2>团队成员</h2></div><span class="result-count" th:text="${users.size()} + ' 人'">0 人</span></div>
+    <div class="table-wrap"><table><thead><tr><th>登录名</th><th>显示名称</th><th>角色</th><th>创建时间</th></tr></thead>
+      <tbody><tr th:each="user : ${users}"><td><code th:text="${user.username}">username</code></td><td th:text="${user.displayName}">名称</td><td><span class="role-pill" th:text="${@viewLabels.role(user.role)}">作者</span></td><td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">日期</td></tr></tbody>
+    </table></div>
+  </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

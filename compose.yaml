@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mysql:8.4.12
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: blog_cms
+      MYSQL_USER: blog_cms
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD before starting Compose}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD before starting Compose}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --host=127.0.0.1 --user=root --password=\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: "8080"
+      SERVER_ADDRESS: 0.0.0.0
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/blog_cms?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: blog_cms
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD before starting Compose}
+      BLOG_ADMIN_USERNAME: ${BLOG_ADMIN_USERNAME:?Set BLOG_ADMIN_USERNAME before starting Compose}
+      BLOG_ADMIN_PASSWORD: ${BLOG_ADMIN_PASSWORD:?Set BLOG_ADMIN_PASSWORD before starting Compose}
+      BLOG_SITE_TITLE: ${BLOG_SITE_TITLE:-墨页博客}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    ports:
+      - "127.0.0.1:${PORT:-8080}:8080"
+
+volumes:
+  mysql_data:

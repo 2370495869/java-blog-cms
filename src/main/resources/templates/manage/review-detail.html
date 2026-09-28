@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>文章审核</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width review-layout">
+  <a class="back-link" th:href="@{/manage/review}">← 返回审核队列</a>
+  <div th:replace="~{fragments/layout :: flash}"></div>
+  <article class="panel review-document">
+    <span class="status-pill status-in_review">待审核</span>
+    <h1 th:text="${article.title}">文章标题</h1>
+    <p class="article-summary" th:text="${article.summary}">文章摘要</p>
+    <div class="article-byline"><span th:text="${'作者 · ' + article.author.displayName}">作者</span><span th:if="${article.category != null}" th:text="${article.category.name}">分类</span><span th:each="tag : ${article.tags}" th:text="${tag.name}">标签</span></div>
+    <div class="markdown-body" th:utext="${renderedContent}"></div>
+  </article>
+  <section class="panel decision-panel">
+    <div><p class="eyebrow">YOUR DECISION</p><h2>审核结果</h2><p class="muted">发布后文章会出现在公开列表和搜索结果中。</p></div>
+    <div class="decision-actions">
+      <form th:action="@{/manage/review/{id}/publish(id=${article.id})}" method="post"><button class="button button-primary" type="submit">通过并发布</button></form>
+      <form th:action="@{/manage/review/{id}/reject(id=${article.id})}" method="post" th:object="${reviewForm}" class="reject-form">
+        <label>退回说明<input type="text" th:field="*{note}" maxlength="200" required placeholder="告诉作者需要修改的内容"></label>
+        <button class="button button-danger" type="submit">退回修改</button>
+      </form>
+    </div>
+  </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

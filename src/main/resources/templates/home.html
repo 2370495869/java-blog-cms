@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="发现值得阅读的文章，按主题、分类和标签探索内容。">
+  <title th:text="${siteTitle} + ' · 文章'">墨页博客 · 文章</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+  <section class="hero page-width">
+    <p class="eyebrow">IDEAS, WELL EDITED</p>
+    <h1>好内容，<span>值得慢慢读。</span></h1>
+    <p class="hero-copy">在这里发现新知、整理思路，也读读别人认真写下的经验。</p>
+  </section>
+
+  <section class="search-panel page-width" aria-label="文章搜索">
+    <form th:action="@{/}" method="get" class="search-form">
+      <label class="search-field">
+        <span>搜索文章</span>
+        <input type="search" name="q" maxlength="100" placeholder="标题、摘要或正文关键词" th:value="${keyword}">
+      </label>
+      <label class="search-field">
+        <span>分类</span>
+        <select name="category">
+          <option value="">全部分类</option>
+          <option th:each="category : ${categories}" th:value="${category.slug}" th:text="${category.name}" th:selected="${category.slug == selectedCategory}">分类</option>
+        </select>
+      </label>
+      <label class="search-field">
+        <span>标签</span>
+        <select name="tag">
+          <option value="">全部标签</option>
+          <option th:each="tag : ${tags}" th:value="${tag.slug}" th:text="${tag.name}" th:selected="${tag.slug == selectedTag}">标签</option>
+        </select>
+      </label>
+      <button class="button button-primary" type="submit">搜索文章</button>
+      <a class="clear-search" th:href="@{/}">清除</a>
+    </form>
+    <p class="form-error" th:if="${queryError}" th:text="${queryError}">搜索词无效</p>
+  </section>
+
+  <section class="listing page-width">
+    <div class="section-heading">
+      <div><p class="eyebrow">THE LIBRARY</p><h2>最新发布</h2></div>
+      <p class="result-count" th:text="'共 ' + ${articles.totalElements} + ' 篇文章'">共 0 篇文章</p>
+    </div>
+
+    <div class="article-grid" th:if="${!articles.isEmpty()}">
+      <article class="article-card" th:each="article : ${articles.content}">
+        <div class="card-meta">
+          <span class="category-pill" th:if="${article.category != null}" th:text="${article.category.name}">分类</span>
+          <span th:if="${article.category == null}">随笔</span>
+          <time th:datetime="${article.publishedAt}" th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd')}">日期</time>
+        </div>
+        <h3><a th:href="@{/articles/{slug}(slug=${article.slug})}" th:text="${article.title}">文章标题</a></h3>
+        <p class="card-summary" th:text="${article.summary}">文章摘要</p>
+        <div class="card-footer"><span th:text="${article.author.displayName}">作者</span><a class="text-link" th:href="@{/articles/{slug}(slug=${article.slug})}">继续阅读 <span aria-hidden="true">↗</span></a></div>
+      </article>
+    </div>
+
+    <div class="empty-state" th:if="${articles.isEmpty()}">
+      <span class="empty-mark">阅</span>
+      <h3>这里还没有公开文章</h3>
+      <p>新文章经过编辑审核后，会出现在这里。</p>
+      <a th:if="${viewer == null}" class="text-link" th:href="@{/login}">作者登录入口 →</a>
+    </div>
+
+    <nav class="pagination" th:if="${articles.totalPages > 1}" aria-label="文章分页">
+      <a th:if="${articles.hasPrevious()}" th:href="@{/(q=${keyword},category=${selectedCategory},tag=${selectedTag},page=${articles.number - 1})}">← 上一页</a>
+      <span th:text="${articles.number + 1} + ' / ' + ${articles.totalPages}">1 / 1</span>
+      <a th:if="${articles.hasNext()}" th:href="@{/(q=${keyword},category=${selectedCategory},tag=${selectedTag},page=${articles.number + 1})}">下一页 →</a>
+    </nav>
+  </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

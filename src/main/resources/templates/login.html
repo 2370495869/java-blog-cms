@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>作者登录 · 墨页博客</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="login-page">
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="login-wrap">
+  <section class="login-card">
+    <p class="eyebrow">WELCOME BACK</p>
+    <h1>内容团队登录</h1>
+    <p class="muted">登录后可以撰写内容、处理审核或管理账号。</p>
+    <div class="alert alert-error" th:if="${loginError}">登录名或密码不正确，请重试。</div>
+    <div class="alert alert-success" th:if="${loggedOut}">你已安全退出。</div>
+    <form th:action="@{/login}" method="post" class="stack-form">
+      <label>登录名<input name="username" type="text" autocomplete="username" required autofocus></label>
+      <label>密码<input name="password" type="password" autocomplete="current-password" required></label>
+      <button class="button button-primary button-wide" type="submit">登录工作台</button>
+    </form>
+    <a class="back-link centered" th:href="@{/}">← 返回公开文章</a>
+  </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

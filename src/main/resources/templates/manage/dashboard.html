@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>内容工作台</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width workspace">
+  <div th:replace="~{fragments/layout :: flash}"></div>
+  <section class="workspace-heading">
+    <div><p class="eyebrow">YOUR DESK</p><h1>内容工作台</h1><p class="muted">欢迎回来，<span th:text="${viewer.displayName}">用户</span>。</p></div>
+    <a class="button button-primary" th:href="@{/manage/articles/new}">＋ 写一篇文章</a>
+  </section>
+  <div class="quick-links" th:if="${viewer.roleName == 'EDITOR' or viewer.roleName == 'ADMIN'}">
+    <a class="quick-link" th:href="@{/manage/review}"><span class="quick-icon">审</span><span><strong>审核队列</strong><small>查看作者提交的文章</small></span><span class="arrow">→</span></a>
+  </div>
+  <section class="panel">
+    <div class="section-heading compact"><div><p class="eyebrow">CONTENT</p><h2>文章记录</h2></div><span class="result-count" th:text="${articles.size()} + ' 篇'">0 篇</span></div>
+    <div class="table-wrap" th:if="${!articles.isEmpty()}">
+      <table>
+        <thead><tr><th>文章</th><th>状态</th><th>作者</th><th>最近更新</th><th>操作</th></tr></thead>
+        <tbody>
+        <tr th:each="article : ${articles}">
+          <td><strong th:text="${article.title}">标题</strong><small class="table-sub" th:text="${article.category == null ? '未分类' : article.category.name}">分类</small></td>
+          <td><span class="status-pill" th:classappend="${' status-' + #strings.toLowerCase(article.status.name())}" th:text="${@viewLabels.status(article.status)}">草稿</span></td>
+          <td th:text="${article.author.displayName}">作者</td>
+          <td th:text="${#temporals.format(article.updatedAt, 'yyyy-MM-dd HH:mm')}">日期</td>
+          <td class="table-actions">
+            <a th:if="${(viewer.roleName == 'ADMIN' or article.author.id == viewer.id) and (article.status.name() == 'DRAFT' or article.status.name() == 'REJECTED')}" th:href="@{/manage/articles/{id}/edit(id=${article.id})}">编辑</a>
+            <a th:href="@{/manage/articles/{id}/history(id=${article.id})}">修订记录</a>
+            <a th:if="${article.status.name() == 'PUBLISHED'}" th:href="@{/articles/{slug}(slug=${article.slug})}">公开页</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="empty-inline" th:if="${articles.isEmpty()}"><strong>还没有文章记录</strong><p>先写下一个想法，再决定保存草稿或送交审核。</p></div>
+  </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

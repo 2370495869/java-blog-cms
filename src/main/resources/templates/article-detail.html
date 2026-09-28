@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" th:content="${article.summary}">
+  <title th:text="${article.title} + ' · ' + ${siteTitle}">文章 · 墨页博客</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width article-page">
+  <a class="back-link" th:href="@{/}">← 返回文章列表</a>
+  <article class="reading-card">
+    <div class="article-heading">
+      <span class="category-pill" th:if="${article.category != null}" th:text="${article.category.name}">分类</span>
+      <h1 th:text="${article.title}">文章标题</h1>
+      <p class="article-summary" th:text="${article.summary}">文章摘要</p>
+      <div class="article-byline">
+        <span th:text="${article.author.displayName}">作者</span>
+        <time th:datetime="${article.publishedAt}" th:text="${#temporals.format(article.publishedAt, 'yyyy-MM-dd HH:mm')}">发布时间</time>
+      </div>
+      <div class="tag-row" th:if="${!article.tags.isEmpty()}">
+        <a class="tag-pill" th:each="tag : ${article.tags}" th:href="@{/(tag=${tag.slug})}" th:text="${tag.name}">标签</a>
+      </div>
+    </div>
+    <div class="markdown-body" th:utext="${renderedContent}"></div>
+  </article>
+  <div class="article-actions" th:if="${canReadHistory}">
+    <a class="text-link" th:href="@{/manage/articles/{id}/history(id=${article.id})}">查看修订记录 →</a>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>分类与标签管理</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width workspace">
+  <div th:replace="~{fragments/layout :: flash}"></div>
+  <section class="workspace-heading"><div><p class="eyebrow">ORGANIZE CONTENT</p><h1>分类与标签</h1><p class="muted">整理主题目录，让读者更容易找到相关内容。</p></div></section>
+  <div class="two-column">
+    <section class="panel"><p class="eyebrow">CATEGORIES</p><h2>文章分类</h2>
+      <form th:action="@{/manage/taxonomy/categories}" method="post" th:object="${categoryForm}" class="inline-form"><label><span class="visually-hidden">分类名称</span><input th:field="*{name}" maxlength="60" required placeholder="新增分类名称"></label><button class="button button-primary" type="submit">添加分类</button></form>
+      <ul class="taxonomy-list"><li th:each="category : ${categories}"><strong th:text="${category.name}">分类</strong><code th:text="${category.slug}">slug</code></li></ul>
+      <p class="muted" th:if="${categories.isEmpty()}">还没有分类。</p>
+    </section>
+    <section class="panel"><p class="eyebrow">TAGS</p><h2>文章标签</h2>
+      <form th:action="@{/manage/taxonomy/tags}" method="post" th:object="${tagForm}" class="inline-form"><label><span class="visually-hidden">标签名称</span><input th:field="*{name}" maxlength="40" required placeholder="新增标签名称"></label><button class="button button-primary" type="submit">添加标签</button></form>
+      <ul class="taxonomy-list"><li th:each="tag : ${tags}"><strong th:text="${tag.name}">标签</strong><code th:text="${tag.slug}">slug</code></li></ul>
+      <p class="muted" th:if="${tags.isEmpty()}">还没有标签。</p>
+    </section>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

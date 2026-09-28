@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>编辑文章 · 内容工作台</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width editor-layout">
+  <div class="editor-main">
+    <a class="back-link" th:href="@{/manage}">← 返回工作台</a>
+    <div th:replace="~{fragments/layout :: flash}"></div>
+    <section class="panel editor-panel">
+      <p class="eyebrow" th:text="${article == null ? 'NEW ARTICLE' : 'EDIT ARTICLE'}">ARTICLE</p>
+      <h1 th:text="${article == null ? '写下一篇文章' : '编辑文章'}">写下一篇文章</h1>
+      <p class="muted">使用 Markdown 排版。保存草稿只有你和编辑可见；提交后进入审核队列。</p>
+      <div class="alert alert-error" th:if="${formError}" th:text="${formError}">保存失败</div>
+      <form method="post" th:action="@{${formAction}}" th:object="${form}" class="stack-form">
+        <label>文章标题<input type="text" th:field="*{title}" maxlength="200" required placeholder="给这篇文章一个清晰的标题"><small class="field-error" th:errors="*{title}"></small></label>
+        <label>摘要<textarea th:field="*{summary}" rows="3" maxlength="500" placeholder="用几句话介绍文章内容"></textarea><small class="field-error" th:errors="*{summary}"></small></label>
+        <label>正文（Markdown）<textarea class="markdown-input" th:field="*{contentMarkdown}" rows="22" maxlength="50000" required placeholder="# 小标题&#10;&#10;在这里开始写作。支持标题、列表、引用、代码和表格。"></textarea><small class="field-error" th:errors="*{contentMarkdown}"></small></label>
+        <label>分类<select th:field="*{categoryId}"><option value="">暂不分类</option><option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">分类</option></select></label>
+        <fieldset class="tag-picker"><legend>标签</legend><label class="check-option" th:each="tag : ${tags}"><input type="checkbox" th:field="*{tagIds}" th:value="${tag.id}"><span th:text="${tag.name}">标签</span></label><p class="muted" th:if="${tags.isEmpty()}">管理员还没有创建标签。</p></fieldset>
+        <div class="form-actions">
+          <button class="button button-quiet" type="submit" name="action" value="draft">保存草稿</button>
+          <button class="button button-primary" type="submit" name="action" value="review">提交审核</button>
+        </div>
+      </form>
+      <p class="muted" th:if="${article != null}">当前状态：<strong th:text="${@viewLabels.status(article.status)}">草稿</strong> · 友好地址：<code th:text="${'/articles/' + article.slug}">/articles/example</code></p>
+    </section>
+  </div>
+  <aside class="editor-aside"><span class="aside-icon">✦</span><h2>发布前检查</h2><ul><li>标题能准确说明文章主题</li><li>摘要帮助读者判断是否继续阅读</li><li>确认分类和标签便于检索</li><li>提交审核后由编辑决定是否发布</li></ul><p>Markdown 中的原始 HTML 会转义，链接和渲染结果也会经过安全过滤。</p></aside>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

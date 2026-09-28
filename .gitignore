@@ -1,0 +1,17 @@
+/target/
+/data/
+/uploads/
+/logs/
+/.env
+/.env.*
+!/.env.example
+*.db
+*.mv.db
+*.trace.db
+*.class
+*.jar
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

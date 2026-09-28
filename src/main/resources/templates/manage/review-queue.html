@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>审核队列 · 内容工作台</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width workspace">
+  <div th:replace="~{fragments/layout :: flash}"></div>
+  <section class="workspace-heading"><div><p class="eyebrow">EDITORIAL REVIEW</p><h1>审核队列</h1><p class="muted">仔细阅读文章，发布合格内容或写明原因退回修改。</p></div><span class="count-badge" th:text="${articles.size()}">0</span></section>
+  <div class="review-grid" th:if="${!articles.isEmpty()}">
+    <article class="review-card" th:each="article : ${articles}">
+      <div class="card-meta"><span class="status-pill status-in_review">待审核</span><time th:text="${#temporals.format(article.updatedAt, 'yyyy-MM-dd HH:mm')}">日期</time></div>
+      <h2><a th:href="@{/manage/review/{id}(id=${article.id})}" th:text="${article.title}">文章标题</a></h2>
+      <p th:text="${article.summary}">摘要</p>
+      <div class="card-footer"><span th:text="${'作者 · ' + article.author.displayName}">作者</span><a class="text-link" th:href="@{/manage/review/{id}(id=${article.id})}">开始审核 →</a></div>
+    </article>
+  </div>
+  <div class="empty-state" th:if="${articles.isEmpty()}"><span class="empty-mark">✓</span><h3>队列已清空</h3><p>暂时没有等待审核的文章。</p><a class="text-link" th:href="@{/manage}">返回工作台 →</a></div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

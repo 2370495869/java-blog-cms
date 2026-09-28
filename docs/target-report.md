@@ -1,0 +1,61 @@
+# 目标报告：java-blog-cms
+
+## 建设目标
+
+把现有实验四的单文件 HTTP/H2 文章与标签程序扩展为一个可独立运行、适合演示和公开发布的博客内容管理系统。保留原实验源码作为历史参考，新系统提供访客阅读、作者写作、编辑审核和管理员维护各自明确的操作入口。
+
+## 当前项目起点
+
+- 当前分支为 `main`，仓库尚无提交且未配置 Git remote；目录中的现有文件均是未提交内容，改造时必须保留其有效内容。
+- 现有应用只有 Java 内置 HTTP 服务、H2 文件数据库、文章/标签、组合筛选、分页和详情页，没有账户认证、审核发布流程、分类、修订记录或 Markdown 渲染。
+- 根目录中已有本机数据库、`.class`、`h2.jar`、日志和 `target/` 构建目录；这些运行产物仅留在本机，不能进入新仓库。
+- 本机已安装 Eclipse Temurin Java 21；当前终端未找到 Maven、Docker CLI 或 GitHub CLI。
+
+## 用户可见功能
+
+- 访客可按标题/正文关键词、分类和标签搜索公开文章，并分页浏览；已发布文章使用稳定的友好 URL。
+- 作者登录后可新建和编辑自己的草稿、维护分类与标签关系、提交编辑审核，并查看完整修订记录。
+- 编辑可查看待审核文章并发布或退回修改；管理员拥有编辑权限并可创建作者、编辑及管理员账号。
+- 未发布内容始终不出现在公开列表、搜索结果或公开详情页中。
+
+## 技术与部署选择
+
+- Java 21 LTS 与 Spring Boot 4.0.8；Boot 4.0.8 官方系统要求为 Java 17 至 26，因此与 Java 21 兼容。
+- Maven 3.9.16，由提交到项目的 Maven Wrapper 固定；构建使用 Maven Wrapper 而不依赖系统级 Maven。
+- Thymeleaf 服务端页面、Spring Security 表单登录与角色授权、BCrypt 密码哈希、Spring Data JPA 持久化。
+- MySQL 8.4.12（8.4 LTS 系列）用于 Docker Compose 演示部署；Flyway 版本化迁移管理数据库结构。本机默认使用隔离的 H2 文件数据库，方便不安装 Docker 时启动。
+- CommonMark Java 0.30.0（表格扩展）解析 Markdown，渲染时转义原始 HTML 并过滤不安全 URL，再由 jsoup 1.23.2 Safelist 做输出净化。
+- 文章状态采用草稿、待审核、已发布和退回修改；修订表保存文章内容、状态、修改者、时间和说明的快照。
+- GitHub Actions 执行 Wrapper 构建与自动化测试；Dockerfile 和 Compose 提供应用与 MySQL 的一键启动方式。
+
+选型参考：
+
+- [Spring Boot 4.0 系统要求](https://docs.spring.io/spring-boot/4.0/system-requirements.html)
+- [Spring Boot 构建与官方 Starter](https://docs.spring.io/spring-boot/4.0/reference/using/build-systems.html)
+- [Spring Security 7.0 参考文档](https://docs.spring.io/spring-security/reference/)
+- [MySQL 8.4 发布说明](https://dev.mysql.com/doc/relnotes/mysql/8.4/en/)
+- [Apache Maven 3.9.16 发布说明](https://maven.apache.org/docs/3.9.16/release-notes.html)
+- [Maven Wrapper 官方文档](https://maven.apache.org/tools/wrapper/)
+- [CommonMark Java 渲染与安全选项](https://github.com/commonmark/commonmark-java)
+- [jsoup 发布记录](https://jsoup.org/news/)
+
+## 安全边界
+
+- 所有写操作需要登录并按角色授权；保留 Spring Security 默认 CSRF 防护，密码只存哈希。
+- Markdown 原始 HTML 不作为可信内容输出；拦截脚本 URL 和不在白名单中的 HTML 元素。
+- 数据库密码、初始管理员密码只由环境变量注入；仓库只包含无真实凭据的示例配置。
+- 使用 `.gitignore` 排除环境文件、本机数据库、上传目录、日志、编译输出和本地 IDE 配置。
+- 管理界面不开放匿名注册。部署时由管理员创建作者、编辑和其他管理员账号。
+
+## 完成验收标准
+
+1. `./mvnw verify` 可在 Java 21 环境完成编译和自动化测试；测试覆盖 Markdown XSS 防护、角色访问边界和文章审核状态转换。
+2. 不依赖 Docker 的本机启动方式可运行，Flyway 可创建数据库结构；`docker compose config` 与 Compose 服务定义可供使用 MySQL 8.4.12 部署。
+3. 实现公开检索/分页/分类/标签/友好 URL、草稿编辑、编辑审核、权限角色及可查看的文章修订记录。
+4. 中文 README 说明环境要求、启动、管理员初始化、角色工作流、迁移、测试、Compose、备份和安全配置。
+5. 实现报告如实记录通过的检查和无法执行的检查；最终提交前逐项审查文件清单与 diff，不提交凭据、本机数据或构建产物。
+6. 仅当前项目进入名为 `java-blog-cms` 的公开 GitHub 仓库，并将提交推送到 `main`，不覆盖未知远程历史。
+
+## 验证计划与已知环境限制
+
+将运行 Wrapper 构建/测试、带 H2 的本机 HTTP 启动与公开页 smoke check、Markdown 与权限自动化测试、依赖/敏感文件扫描及最终 Git 文件清单审查。当前尚未检测到 Docker CLI，因此 MySQL Compose 启动检查能否执行取决于后续工具可用性；当前也未检测到系统 Maven 或 `gh`，项目 Wrapper 和 GitHub 授权能力需要分别验证。任何无法执行的检查会在实现报告中标为未验证，不会写成通过。
