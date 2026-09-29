@@ -16,7 +16,7 @@
 
 - Java 21、Spring Boot 4.0.8、Maven 3.9.16。
 - Spring MVC + Thymeleaf、Spring Security、Spring Data JPA。
-- MySQL 8.4.12（Compose）、H2（本机快速运行）、Flyway。
+- MySQL 8.4.11（Compose，属于 8.4 LTS）、H2（本机快速运行）、Flyway。
 - CommonMark Java 0.30.0、jsoup 1.23.2。
 
 ## 快速开始

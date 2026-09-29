@@ -6,7 +6,7 @@
 - 用 Spring MVC、Thymeleaf、Spring Security、Spring Data JPA 实现公开页面和内容工作台；原实验 `BlogServer.java` 原样保存在 `legacy/`，不再作为主程序运行。
 - 访客可以按文章关键词、分类和标签搜索，分页浏览已发布文章，并通过保留 Unicode 的 slug 访问文章。
 - 作者只能编辑自己的草稿或退回文章；编辑可审核、发布或退回；管理员可分配三个角色并管理分类和标签。表单沿用 Spring Security CSRF 防护，密码用 BCrypt 哈希。
-- 数据迁移由 Flyway 版本化管理；Compose 数据库为 MySQL 8.4.12，本机默认数据库为 Boot BOM 管理的 H2 2.4.240。Hibernate 使用 `ddl-auto=validate`。
+- 数据迁移由 Flyway 版本化管理；Compose 数据库固定为 MySQL 8.4.11，本机默认数据库为 Boot BOM 管理的 H2 2.4.240。Hibernate 使用 `ddl-auto=validate`。
 - 每次草稿保存、送审、发布和退回都写入文章修订快照。
 - Markdown 使用 CommonMark Java 0.30.0 渲染，转义原始 HTML、过滤危险 URL，并使用 jsoup 1.23.2 Safelist 再净化输出。
 - 提供 Dockerfile、Docker Compose、忽略规则和中文 README。GitHub Actions 用 Java 21 执行 Wrapper `verify`，Pull Request 检查新增依赖。
@@ -19,10 +19,13 @@
 - 发布前检查了 69 个暂存文件：没有发现私钥/令牌模式、学号或姓名标记，也没有暂存 `.env`、数据库、上传目录、日志或构建产物。
 - H2 Flyway 迁移 V1 与 Hibernate schema 校验在测试及实际本机启动时均成功。Flyway 11.14.1 发出提示：其正式验证的 H2 最高版本为 2.3.232，而 Boot BOM 选用 H2 2.4.240；本次迁移和启动实测通过，但 Flyway 尚未声明验证该 H2 补丁版本。
 
-## 尚未验证的部分
+- 2026-09-29 在 Windows Docker Desktop linux/amd64 引擎上验证 Compose：最初指定的 `mysql:8.4.12` 无法从 Docker Hub 获取，改为本次已拉取并实测运行的 `mysql:8.4.11`；Dockerfile 构建成功，MySQL 健康检查通过，Flyway V1 迁移成功，Spring Boot 使用 Java 21.0.12.1 启动，`/`、`/login`、`/actuator/health` 均返回 HTTP 200，健康状态为 `UP`。Maven `verify` 在 Docker 构建器中再次通过，5 项测试全部通过。
 
-- 当前环境没有 Docker CLI，因此未运行 `docker compose config`、Docker 镜像构建或 MySQL 8.4.12 容器启动；MySQL 专属行为仍需在具备 Docker 的环境验证。集成测试和本机启动使用 H2。
-- GitHub Actions 尚未在 GitHub runner 上执行；本地用同一 Maven Wrapper 构建和测试。
+## 验证边界
+
+- Flyway 提示其已验证的 MySQL 版本范围截至 8.1；本次 MySQL 8.4.11 上 V1 迁移成功，但不能据此证明所有 MySQL 8.4 行为。
+- Docker 启动验证针对本机 linux/amd64；其他 CPU 架构和生产反向代理配置未在此轮实测。
+- GitHub Actions 工作流配置为推送时运行 Maven `verify`；本地 Docker 与 Maven 结果独立记录。
 
 ## GitHub 同步结果
 
