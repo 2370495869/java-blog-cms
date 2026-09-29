@@ -12,6 +12,7 @@
       <h1 th:text="${article == null ? '写下一篇文章' : '编辑文章'}">写下一篇文章</h1>
       <p class="muted">使用 Markdown 排版。保存草稿只有你和编辑可见；提交后进入审核队列。</p>
       <div class="alert alert-error" th:if="${formError}" th:text="${formError}">保存失败</div>
+      <div class="alert alert-warning" th:if="${article != null and article.status.name() == 'PUBLISHED'}">这篇文章当前公开可见。保存草稿或重新送审后会立即从公开页面下线，需再次由其他编辑审核发布。</div>
       <form method="post" th:action="@{${formAction}}" th:object="${form}" class="stack-form">
         <label>文章标题<input type="text" th:field="*{title}" maxlength="200" required placeholder="给这篇文章一个清晰的标题"><small class="field-error" th:errors="*{title}"></small></label>
         <label>摘要<textarea th:field="*{summary}" rows="3" maxlength="500" placeholder="用几句话介绍文章内容"></textarea><small class="field-error" th:errors="*{summary}"></small></label>
@@ -19,6 +20,7 @@
         <label>分类<select th:field="*{categoryId}"><option value="">暂不分类</option><option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}">分类</option></select></label>
         <fieldset class="tag-picker"><legend>标签</legend><label class="check-option" th:each="tag : ${tags}"><input type="checkbox" th:field="*{tagIds}" th:value="${tag.id}"><span th:text="${tag.name}">标签</span></label><p class="muted" th:if="${tags.isEmpty()}">管理员还没有创建标签。</p></fieldset>
         <div class="form-actions">
+          <button class="button button-quiet" type="submit" th:formaction="@{/manage/articles/preview}" formtarget="_blank" formnovalidate>预览当前内容</button>
           <button class="button button-quiet" type="submit" name="action" value="draft">保存草稿</button>
           <button class="button button-primary" type="submit" name="action" value="review">提交审核</button>
         </div>

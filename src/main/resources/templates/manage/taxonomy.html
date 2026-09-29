@@ -9,12 +9,40 @@
   <div class="two-column">
     <section class="panel"><p class="eyebrow">CATEGORIES</p><h2>文章分类</h2>
       <form th:action="@{/manage/taxonomy/categories}" method="post" th:object="${categoryForm}" class="inline-form"><label><span class="visually-hidden">分类名称</span><input th:field="*{name}" maxlength="60" required placeholder="新增分类名称"></label><button class="button button-primary" type="submit">添加分类</button></form>
-      <ul class="taxonomy-list"><li th:each="category : ${categories}"><strong th:text="${category.name}">分类</strong><code th:text="${category.slug}">slug</code></li></ul>
+      <p class="muted">重命名会保留原筛选链接；删除分类后，关联文章会保留并变为未分类。</p>
+      <ul class="taxonomy-list"><li class="taxonomy-entry" th:each="category : ${categories}">
+        <div class="taxonomy-label"><strong th:text="${category.name}">分类</strong><code th:text="${category.slug}">slug</code></div>
+        <form th:action="@{/manage/taxonomy/categories/{id}/rename(id=${category.id})}" method="post" class="taxonomy-edit-form">
+          <label class="visually-hidden" th:for="|category-name-${category.id}|">分类名称</label>
+          <input type="text" name="name" th:id="|category-name-${category.id}|" th:value="${category.name}" maxlength="60" required>
+          <button class="button button-quiet" type="submit">保存</button>
+        </form>
+        <details class="taxonomy-delete-confirm">
+          <summary class="button button-danger">删除</summary>
+          <form th:action="@{/manage/taxonomy/categories/{id}/delete(id=${category.id})}" method="post" class="taxonomy-delete-form">
+            <p>确认删除？文章会保留并变为未分类。</p><button class="button button-danger" type="submit">确认删除分类</button>
+          </form>
+        </details>
+      </li></ul>
       <p class="muted" th:if="${categories.isEmpty()}">还没有分类。</p>
     </section>
     <section class="panel"><p class="eyebrow">TAGS</p><h2>文章标签</h2>
       <form th:action="@{/manage/taxonomy/tags}" method="post" th:object="${tagForm}" class="inline-form"><label><span class="visually-hidden">标签名称</span><input th:field="*{name}" maxlength="40" required placeholder="新增标签名称"></label><button class="button button-primary" type="submit">添加标签</button></form>
-      <ul class="taxonomy-list"><li th:each="tag : ${tags}"><strong th:text="${tag.name}">标签</strong><code th:text="${tag.slug}">slug</code></li></ul>
+      <p class="muted">重命名会保留原筛选链接；删除标签会清除该标签与文章的关联。</p>
+      <ul class="taxonomy-list"><li class="taxonomy-entry" th:each="tag : ${tags}">
+        <div class="taxonomy-label"><strong th:text="${tag.name}">标签</strong><code th:text="${tag.slug}">slug</code></div>
+        <form th:action="@{/manage/taxonomy/tags/{id}/rename(id=${tag.id})}" method="post" class="taxonomy-edit-form">
+          <label class="visually-hidden" th:for="|tag-name-${tag.id}|">标签名称</label>
+          <input type="text" name="name" th:id="|tag-name-${tag.id}|" th:value="${tag.name}" maxlength="40" required>
+          <button class="button button-quiet" type="submit">保存</button>
+        </form>
+        <details class="taxonomy-delete-confirm">
+          <summary class="button button-danger">删除</summary>
+          <form th:action="@{/manage/taxonomy/tags/{id}/delete(id=${tag.id})}" method="post" class="taxonomy-delete-form">
+            <p>确认删除？文章会保留，但该标签关系会清除。</p><button class="button button-danger" type="submit">确认删除标签</button>
+          </form>
+        </details>
+      </li></ul>
       <p class="muted" th:if="${tags.isEmpty()}">还没有标签。</p>
     </section>
   </div>

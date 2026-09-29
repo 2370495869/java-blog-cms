@@ -2,6 +2,7 @@ package com.blogcms.service;
 
 import com.blogcms.domain.Category;
 import com.blogcms.domain.Tag;
+import com.blogcms.repository.ArticleRepository;
 import com.blogcms.repository.CategoryRepository;
 import com.blogcms.repository.TagRepository;
 import java.util.List;
@@ -12,11 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class CatalogService {
     private final CategoryRepository categories;
     private final TagRepository tags;
+    private final ArticleRepository articles;
     private final SlugService slugs;
 
-    public CatalogService(CategoryRepository categories, TagRepository tags, SlugService slugs) {
+    public CatalogService(CategoryRepository categories, TagRepository tags,
+                          ArticleRepository articles, SlugService slugs) {
         this.categories = categories;
         this.tags = tags;
+        this.articles = articles;
         this.slugs = slugs;
     }
 
@@ -40,6 +44,44 @@ public class CatalogService {
         if (tags.existsByNameIgnoreCase(name)) throw new IllegalArgumentException("这个标签名称已经存在。");
         String slug = uniqueSlug(slugs.toSlug(name), false);
         tags.save(new Tag(name, slug));
+    }
+
+    @Transactional
+    public void renameCategory(Long id, String rawName) {
+        Category category = categories.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("这个分类不存在，可能已被删除。"));
+        String name = normalize(rawName, 60);
+        if (categories.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            throw new IllegalArgumentException("这个分类名称已经存在。请换一个名称。");
+        }
+        category.renameTo(name);
+    }
+
+    @Transactional
+    public void renameTag(Long id, String rawName) {
+        Tag tag = tags.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("这个标签不存在，可能已被删除。"));
+        String name = normalize(rawName, 40);
+        if (tags.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            throw new IllegalArgumentException("这个标签名称已经存在。请换一个名称。");
+        }
+        tag.renameTo(name);
+    }
+
+    @Transactional
+    public void deleteCategory(Long id) {
+        Category category = categories.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("这个分类不存在，可能已被删除。"));
+        articles.clearCategoryReference(id);
+        categories.delete(category);
+    }
+
+    @Transactional
+    public void deleteTag(Long id) {
+        Tag tag = tags.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("这个标签不存在，可能已被删除。"));
+        articles.clearTagReferences(id);
+        tags.delete(tag);
     }
 
     private String uniqueSlug(String base, boolean category) {

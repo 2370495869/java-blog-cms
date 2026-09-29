@@ -3,6 +3,7 @@ package com.blogcms.service;
 import com.blogcms.domain.AppUser;
 import com.blogcms.domain.Role;
 import com.blogcms.repository.UserRepository;
+import java.util.Locale;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -22,7 +23,7 @@ public class BootstrapAdminRunner implements ApplicationRunner {
             @Value("${app.bootstrap-admin.password:}") String password) {
         this.users = users;
         this.passwordEncoder = passwordEncoder;
-        this.username = username == null ? "" : username.strip();
+        this.username = username == null ? "" : username.strip().toLowerCase(Locale.ROOT);
         this.password = password == null ? "" : password;
     }
 

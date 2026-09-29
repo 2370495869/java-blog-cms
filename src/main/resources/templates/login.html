@@ -13,13 +13,17 @@
     <p class="eyebrow">WELCOME BACK</p>
     <h1>内容团队登录</h1>
     <p class="muted">登录后可以撰写内容、处理审核或管理账号。</p>
+    <div class="alert alert-success" th:if="${registered}">作者账号已创建，请使用新账号登录。</div>
     <div class="alert alert-error" th:if="${loginError}">登录名或密码不正确，请重试。</div>
     <div class="alert alert-success" th:if="${loggedOut}">你已安全退出。</div>
+    <div class="alert alert-error" th:if="${disabled}">此账号已被管理员停用，请联系管理员恢复访问。</div>
+    <div class="alert alert-success" th:if="${roleChanged}">账号角色已调整，请重新登录以加载新权限。</div>
     <form th:action="@{/login}" method="post" class="stack-form">
       <label>登录名<input name="username" type="text" autocomplete="username" required autofocus></label>
       <label>密码<input name="password" type="password" autocomplete="current-password" required></label>
       <button class="button button-primary button-wide" type="submit">登录工作台</button>
     </form>
+    <a class="back-link centered" th:href="@{/register}">还没有作者账号？立即注册</a>
     <a class="back-link centered" th:href="@{/}">← 返回公开文章</a>
   </section>
 </main>

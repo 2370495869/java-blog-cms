@@ -2,19 +2,34 @@ package com.blogcms.repository;
 
 import com.blogcms.domain.Article;
 import com.blogcms.domain.ArticleStatus;
+import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ArticleRepository extends JpaRepository<Article, Long> {
+    @Modifying(flushAutomatically = true)
+    @Query("update Article a set a.category = null where a.category.id = :categoryId")
+    int clearCategoryReference(@Param("categoryId") Long categoryId);
+
+    @Modifying(flushAutomatically = true)
+    @Query(value = "delete from article_tags where tag_id = :tagId", nativeQuery = true)
+    int clearTagReferences(@Param("tagId") Long tagId);
+
     @Override
     @EntityGraph(attributePaths = {"author", "category", "tags"})
     java.util.Optional<Article> findById(Long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Article a where a.id = :id")
+    Optional<Article> findByIdForUpdate(@Param("id") Long id);
 
     @EntityGraph(attributePaths = {"author", "category"})
     @Query("""

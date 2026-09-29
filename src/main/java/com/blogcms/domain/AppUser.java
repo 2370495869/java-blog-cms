@@ -49,6 +49,10 @@ public class AppUser {
     public String getPasswordHash() { return passwordHash; }
     public String getDisplayName() { return displayName; }
     public Role getRole() { return role; }
+    public void updateRole(Role role) { this.role = role; }
     public boolean isEnabled() { return enabled; }
+    public void updateDisplayName(String displayName) { this.displayName = displayName; }
+    public void updatePasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 }

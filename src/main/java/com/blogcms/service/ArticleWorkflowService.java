@@ -15,7 +15,9 @@ import com.blogcms.security.CmsUserDetails;
 import com.blogcms.web.form.ArticleForm;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +60,19 @@ public class ArticleWorkflowService {
     }
 
     @Transactional(readOnly = true)
+    public Map<Long, String> rejectionNotes(List<Article> dashboardArticles) {
+        List<Long> rejectedIds = dashboardArticles.stream()
+                .filter(article -> article.getStatus() == ArticleStatus.REJECTED)
+                .map(Article::getId)
+                .toList();
+        if (rejectedIds.isEmpty()) return Map.of();
+        Map<Long, String> notes = new HashMap<>();
+        revisions.findLatestRejectionNotes(rejectedIds)
+                .forEach(note -> notes.put(note.getArticleId(), note.getChangeNote()));
+        return Map.copyOf(notes);
+    }
+
+    @Transactional(readOnly = true)
     public List<Article> reviewQueue() {
         return articles.findByStatusOrderByUpdatedAtAsc(ArticleStatus.IN_REVIEW);
     }
@@ -82,12 +97,14 @@ public class ArticleWorkflowService {
     @Transactional
     public void save(long articleId, ArticleForm form, CmsUserDetails actor, boolean submitForReview) {
         Article article = editable(articleId, actor);
-        if (article.getStatus() != ArticleStatus.DRAFT && article.getStatus() != ArticleStatus.REJECTED) {
+        if (article.getStatus() != ArticleStatus.DRAFT && article.getStatus() != ArticleStatus.REJECTED
+                && article.getStatus() != ArticleStatus.PUBLISHED) {
             throw new IllegalStateException("这篇文章当前不能编辑。");
         }
+        // Status and content change in one transaction, so a published article never exposes an edited version.
+        article.setStatus(submitForReview ? ArticleStatus.IN_REVIEW : ArticleStatus.DRAFT);
         article.update(validTitle(form), value(form.getSummary()), value(form.getContentMarkdown()),
                 resolveCategory(form.getCategoryId()), resolveTags(form.getTagIds()));
-        article.setStatus(submitForReview ? ArticleStatus.IN_REVIEW : ArticleStatus.DRAFT);
         articles.saveAndFlush(article);
         record(article, actor.getUser(), submitForReview ? "提交审核" : "保存草稿");
     }
@@ -96,8 +113,9 @@ public class ArticleWorkflowService {
     public Article getForEdit(long articleId, CmsUserDetails actor) {
         Article article = requireArticle(articleId);
         assertAuthorOrAdmin(article, actor);
-        if (article.getStatus() != ArticleStatus.DRAFT && article.getStatus() != ArticleStatus.REJECTED) {
-            throw new IllegalStateException("只有草稿或退回修改的文章可以编辑。");
+        if (article.getStatus() != ArticleStatus.DRAFT && article.getStatus() != ArticleStatus.REJECTED
+                && article.getStatus() != ArticleStatus.PUBLISHED) {
+            throw new IllegalStateException("只有草稿、退回修改或已发布的文章可以编辑。");
         }
         return article;
     }
@@ -107,6 +125,19 @@ public class ArticleWorkflowService {
         Article article = requireArticle(articleId);
         if (article.getStatus() != ArticleStatus.IN_REVIEW) throw new IllegalStateException("这篇文章不在审核队列中。");
         return article;
+    }
+
+    @Transactional(readOnly = true)
+    public String reviewBlockReason(Article article, CmsUserDetails reviewer) {
+        if (article.getAuthor().getId().equals(reviewer.getId())) {
+            return "稿件作者不能审核自己的投稿。";
+        }
+        var submission = latestSubmission(article.getId());
+        if (submission.isEmpty()) return "找不到最近一次送审记录，暂不能审核。";
+        if (submission.get().getChangedBy().getId().equals(reviewer.getId())) {
+            return "你是最近一次提交审核的操作者，不能审核本次投稿。";
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)
@@ -130,8 +161,9 @@ public class ArticleWorkflowService {
     @Transactional
     public void publish(long articleId, CmsUserDetails editor) {
         requireEditor(editor);
-        Article article = requireArticle(articleId);
+        Article article = requireArticleForUpdate(articleId);
         requireInReview(article);
+        requireReviewerCanReview(article, editor);
         article.setStatus(ArticleStatus.PUBLISHED);
         article.setPublishedAt(LocalDateTime.now());
         articles.saveAndFlush(article);
@@ -143,21 +175,27 @@ public class ArticleWorkflowService {
         requireEditor(editor);
         String reason = value(note).strip();
         if (reason.isBlank() || reason.length() > 200) throw new IllegalArgumentException("退回说明必填，最多 200 个字符。");
-        Article article = requireArticle(articleId);
+        Article article = requireArticleForUpdate(articleId);
         requireInReview(article);
+        requireReviewerCanReview(article, editor);
         article.setStatus(ArticleStatus.REJECTED);
         articles.saveAndFlush(article);
         record(article, editor.getUser(), reason);
     }
 
     private Article editable(long id, CmsUserDetails actor) {
-        Article article = requireArticle(id);
+        Article article = requireArticleForUpdate(id);
         assertAuthorOrAdmin(article, actor);
         return article;
     }
 
     private Article requireArticle(long id) {
         return articles.findById(id).orElseThrow(() -> new IllegalArgumentException("文章不存在。"));
+    }
+
+    private Article requireArticleForUpdate(long id) {
+        return articles.findByIdForUpdate(id)
+                .orElseThrow(() -> new IllegalArgumentException("文章不存在。"));
     }
 
     private void assertAuthorOrAdmin(Article article, CmsUserDetails actor) {
@@ -180,6 +218,16 @@ public class ArticleWorkflowService {
 
     private void requireInReview(Article article) {
         if (article.getStatus() != ArticleStatus.IN_REVIEW) throw new IllegalStateException("文章已被其他编辑处理。");
+    }
+
+    private void requireReviewerCanReview(Article article, CmsUserDetails reviewer) {
+        String reason = reviewBlockReason(article, reviewer);
+        if (reason != null) throw new AccessDeniedException(reason);
+    }
+
+    private java.util.Optional<ArticleRevision> latestSubmission(long articleId) {
+        return revisions.findFirstByArticleIdAndStatusOrderByRevisionNoDesc(articleId,
+                ArticleStatus.IN_REVIEW.name());
     }
 
     private void record(Article article, AppUser actor, String note) {

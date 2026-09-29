@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>注册作者账号 · 墨页博客</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="login-page">
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="login-wrap">
+  <section class="login-card">
+    <p class="eyebrow">JOIN THE WRITERS</p>
+    <h1>注册作者账号</h1>
+    <p class="muted">注册后可以保存草稿并投稿，文章需经编辑审核后才会公开。</p>
+    <div class="alert alert-error" th:if="${formError}" th:text="${formError}">注册失败</div>
+    <form th:action="@{/register}" method="post" th:object="${form}" class="stack-form">
+      <label>登录名<input th:field="*{username}" type="text" minlength="3" maxlength="40" pattern="[A-Za-z0-9][A-Za-z0-9._-]{2,39}" required autocomplete="username" autofocus><small class="field-error" th:errors="*{username}"></small></label>
+      <label>显示名称<input th:field="*{displayName}" type="text" maxlength="80" required autocomplete="name"><small class="field-error" th:errors="*{displayName}"></small></label>
+      <label>密码<input th:field="*{password}" type="password" minlength="12" required autocomplete="new-password"><small class="field-error" th:errors="*{password}"></small><small class="muted">至少 12 个字符，UTF-8 编码后不超过 72 字节。</small></label>
+      <label>确认密码<input th:field="*{passwordConfirmation}" type="password" required autocomplete="new-password"><small class="field-error" th:errors="*{passwordConfirmation}"></small></label>
+      <button class="button button-primary button-wide" type="submit">创建作者账号</button>
+    </form>
+    <a class="back-link centered" th:href="@{/login}">已有账号？登录</a>
+  </section>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

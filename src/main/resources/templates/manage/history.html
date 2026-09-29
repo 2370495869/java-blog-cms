@@ -12,6 +12,10 @@
       <h2 th:text="${entry.revision.title}">标题</h2>
       <p class="revision-note"><strong th:text="${entry.revision.changedBy.displayName}">修改者</strong><span th:text="${entry.revision.changeNote}">保存草稿</span></p>
       <p class="article-summary" th:if="${!#strings.isEmpty(entry.revision.summary)}" th:text="${entry.revision.summary}">摘要</p>
+      <p class="muted" th:text="${'分类：' + (entry.revision.categoryName.isEmpty() ? '未分类' : entry.revision.categoryName)}">分类：未分类</p>
+      <p class="muted" th:if="${!entry.revision.tagsSnapshotAvailable}">该修订早于标签历史快照功能，标签记录不可用。</p>
+      <p class="muted" th:if="${entry.revision.tagsSnapshotAvailable and entry.revision.tagsSnapshot.isEmpty()}">标签：无</p>
+      <p class="muted" th:if="${entry.revision.tagsSnapshotAvailable and !entry.revision.tagsSnapshot.isEmpty()}" th:text="${'标签：' + #strings.listJoin(entry.revision.tagsSnapshot, '、')}">标签</p>
       <div class="markdown-body revision-body" th:utext="${entry.contentHtml}"></div>
     </article>
   </div>

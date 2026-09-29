@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>文章预览 · 内容工作台</title><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page-width review-layout">
+  <a class="back-link" th:href="@{/manage}">← 返回工作台</a>
+  <p class="muted">这是基于当前未保存内容的安全预览。关闭此标签页可继续编辑。</p>
+  <article class="panel review-document">
+    <h1 th:text="${title}">文章预览</h1>
+    <p class="article-summary" th:if="${!#strings.isEmpty(summary)}" th:text="${summary}">文章摘要</p>
+    <div class="markdown-body" th:utext="${renderedContent}"></div>
+  </article>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

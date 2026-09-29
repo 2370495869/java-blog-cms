@@ -24,7 +24,8 @@
           <td th:text="${article.author.displayName}">作者</td>
           <td th:text="${#temporals.format(article.updatedAt, 'yyyy-MM-dd HH:mm')}">日期</td>
           <td class="table-actions">
-            <a th:if="${(viewer.roleName == 'ADMIN' or article.author.id == viewer.id) and (article.status.name() == 'DRAFT' or article.status.name() == 'REJECTED')}" th:href="@{/manage/articles/{id}/edit(id=${article.id})}">编辑</a>
+            <a th:if="${(viewer.roleName == 'ADMIN' or article.author.id == viewer.id) and (article.status.name() == 'DRAFT' or article.status.name() == 'REJECTED' or article.status.name() == 'PUBLISHED')}" th:href="@{/manage/articles/{id}/edit(id=${article.id})}">编辑</a>
+            <small class="rejection-note" th:if="${article.status.name() == 'REJECTED' and rejectionNotes[article.id] != null}" th:text="${'退回说明：' + rejectionNotes[article.id]}">退回说明</small>
             <a th:href="@{/manage/articles/{id}/history(id=${article.id})}">修订记录</a>
             <a th:if="${article.status.name() == 'PUBLISHED'}" th:href="@{/articles/{slug}(slug=${article.slug})}">公开页</a>
           </td>

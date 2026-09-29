@@ -5,8 +5,10 @@
   <a class="brand" th:href="@{/}"><span class="brand-mark">墨</span><span th:text="${siteTitle}">墨页博客</span></a>
   <nav class="main-nav" aria-label="主导航">
     <a th:href="@{/}">文章</a>
-    <a th:if="${viewer == null}" th:href="@{/login}">作者入口</a>
+    <a th:if="${viewer == null}" th:href="@{/login}">作者登录</a>
+    <a th:if="${viewer == null}" th:href="@{/register}">注册作者</a>
     <a th:if="${viewer != null}" th:href="@{/manage}">内容工作台</a>
+    <a th:if="${viewer != null}" th:href="@{/account/profile}">个人账号</a>
     <a th:if="${viewer != null and (viewer.roleName == 'EDITOR' or viewer.roleName == 'ADMIN')}" th:href="@{/manage/review}">审核队列</a>
     <a th:if="${viewer != null and viewer.roleName == 'ADMIN'}" th:href="@{/manage/taxonomy}">分类与标签</a>
     <a th:if="${viewer != null and viewer.roleName == 'ADMIN'}" th:href="@{/manage/users}">账号管理</a>

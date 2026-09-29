@@ -32,10 +32,14 @@ public class ReviewController {
     }
 
     @GetMapping("/manage/review/{id}")
-    public String review(@PathVariable long id, Model model, RedirectAttributes redirect) {
+    public String review(@PathVariable long id, @AuthenticationPrincipal CmsUserDetails viewer,
+                         Model model, RedirectAttributes redirect) {
         try {
             var article = articles.getForReview(id);
             model.addAttribute("article", article);
+            String reviewBlockReason = articles.reviewBlockReason(article, viewer);
+            model.addAttribute("canReview", reviewBlockReason == null);
+            model.addAttribute("reviewBlockReason", reviewBlockReason);
             model.addAttribute("renderedContent", markdown.render(article.getContentMarkdown()));
             model.addAttribute("reviewForm", new ReviewForm());
             return "manage/review-detail";

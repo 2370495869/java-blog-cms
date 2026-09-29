@@ -19,6 +19,7 @@ public class Category {
 
     protected Category() {}
     public Category(String name, String slug) { this.name = name; this.slug = slug; }
+    public void renameTo(String name) { this.name = name; }
     public Long getId() { return id; }
     public String getName() { return name; }
     public String getSlug() { return slug; }

@@ -8,10 +8,12 @@ import com.blogcms.service.MarkdownRenderer;
 import com.blogcms.web.form.ArticleForm;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +36,9 @@ public class ArticleManagementController {
 
     @GetMapping("/manage")
     public String dashboard(@AuthenticationPrincipal CmsUserDetails viewer, Model model) {
-        model.addAttribute("articles", articles.dashboard(viewer));
+        var dashboardArticles = articles.dashboard(viewer);
+        model.addAttribute("articles", dashboardArticles);
+        model.addAttribute("rejectionNotes", articles.rejectionNotes(dashboardArticles));
         return "manage/dashboard";
     }
 
@@ -65,6 +69,20 @@ public class ArticleManagementController {
             prepareForm(model, form);
             return "manage/article-form";
         }
+    }
+
+    @PostMapping("/manage/articles/preview")
+    public String preview(@RequestParam(defaultValue = "") String title,
+                          @RequestParam(defaultValue = "") String summary,
+                          @RequestParam(defaultValue = "") String contentMarkdown,
+                          Model model) {
+        if (title.length() > 200 || summary.length() > 500 || contentMarkdown.length() > 50000) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "预览内容超过字段长度限制。");
+        }
+        model.addAttribute("title", title.isBlank() ? "文章预览" : title);
+        model.addAttribute("summary", summary);
+        model.addAttribute("renderedContent", markdown.render(contentMarkdown));
+        return "manage/article-preview";
     }
 
     @GetMapping("/manage/articles/{id}/edit")

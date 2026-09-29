@@ -110,6 +110,7 @@ button { cursor: pointer; }
 .stack-form input, .stack-form select { min-height: 44px; }
 .alert, .flash { padding: 11px 14px; border-radius: 9px; font-size: 12px; }
 .alert-error { color: var(--danger); background: #fff3f0; }
+.alert-warning { color: #7d5a1d; background: #fff5d9; }
 .alert-success, .flash { color: #246a55; background: #e9f6ee; }
 .flash { margin: 0 0 17px; }
 .workspace { padding-top: 45px; padding-bottom: 72px; }
@@ -126,6 +127,7 @@ th { padding: 11px 10px; color: #859297; border-bottom: 1px solid var(--line); f
 td { padding: 14px 10px; border-bottom: 1px solid #eff2f1; }
 td strong { display: block; }
 .table-sub { display: block; color: #8c999d; font-size: 10px; }
+.rejection-note { color: #956a27; white-space: normal; }
 .table-actions { white-space: nowrap; }
 .table-actions a { margin-right: 11px; color: var(--teal); font-size: 11px; font-weight: 600; }
 .status-pill { display: inline-flex; padding: 4px 9px; border-radius: 999px; color: #546970; background: #eef1f0; font-size: 10px; white-space: nowrap; }
@@ -179,9 +181,23 @@ td strong { display: block; }
 .inline-form input { height: 42px; font-size: 12px; }
 .taxonomy-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .taxonomy-list li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 11px; border-radius: 8px; background: #f7f9f8; font-size: 12px; }
+.taxonomy-entry { flex-wrap: wrap; }
+.taxonomy-label { display: grid; gap: 2px; min-width: 95px; }
+.taxonomy-edit-form { display: flex; flex: 1; align-items: center; gap: 6px; min-width: 180px; max-width: 440px; margin: 0; }
+.taxonomy-edit-form input { width: 100%; min-width: 0; height: 38px; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px; font-size: 12px; }
+.taxonomy-delete-form { margin: 0; }
+.taxonomy-delete-confirm > summary { list-style: none; cursor: pointer; }
+.taxonomy-delete-confirm > summary::-webkit-details-marker { display: none; }
+.taxonomy-delete-confirm[open] { flex: 1 1 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fffaf8; }
+.taxonomy-delete-confirm > form { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.taxonomy-delete-confirm p { margin: 2px 0; color: var(--muted); font-size: 13px; }
+.taxonomy-edit-form .button, .taxonomy-delete-form .button, .taxonomy-delete-confirm .button { min-height: 36px; padding: 7px 11px; }
 .taxonomy-list code, code { color: #718084; font-size: 10px; }
 .user-create-panel { padding: 25px; }
 .user-create-panel h2 { margin-bottom: 18px; font-size: 19px; }
+.account-role-form { display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+.account-role-form select { min-width: 90px; border: 1px solid var(--line); border-radius: 7px; padding: 6px 8px; background: white; color: var(--ink); font-size: 11px; }
+.account-role-form .button { min-height: 30px; padding: 5px 8px; font-size: 10px; }
 .user-form { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto; gap: 10px; align-items: end; }
 .user-form label { font-size: 10px; }
 .user-form input, .user-form select { height: 42px; font-size: 11px; }

@@ -5,7 +5,7 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 <main class="page-width workspace">
   <div th:replace="~{fragments/layout :: flash}"></div>
-  <section class="workspace-heading"><div><p class="eyebrow">TEAM ACCESS</p><h1>账号管理</h1><p class="muted">只为受信任的团队成员创建账号，并按需分配角色。</p></div></section>
+  <section class="workspace-heading"><div><p class="eyebrow">TEAM ACCESS</p><h1>账号管理</h1><p class="muted">可管理注册作者和团队账号。停用后账号不能再次登录；不能停用当前账号或最后一个启用的管理员。</p></div></section>
   <section class="panel user-create-panel">
     <h2>创建账号</h2>
     <form th:action="@{/manage/users}" method="post" th:object="${form}" class="user-form">
@@ -18,8 +18,27 @@
   </section>
   <section class="panel">
     <div class="section-heading compact"><div><p class="eyebrow">TEAM</p><h2>团队成员</h2></div><span class="result-count" th:text="${users.size()} + ' 人'">0 人</span></div>
-    <div class="table-wrap"><table><thead><tr><th>登录名</th><th>显示名称</th><th>角色</th><th>创建时间</th></tr></thead>
-      <tbody><tr th:each="user : ${users}"><td><code th:text="${user.username}">username</code></td><td th:text="${user.displayName}">名称</td><td><span class="role-pill" th:text="${@viewLabels.role(user.role)}">作者</span></td><td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">日期</td></tr></tbody>
+    <div class="table-wrap"><table><thead><tr><th>登录名</th><th>显示名称</th><th>角色</th><th>状态</th><th>创建时间</th><th>操作</th></tr></thead>
+      <tbody><tr th:each="user : ${users}"><td><code th:text="${user.username}">username</code></td><td th:text="${user.displayName}">名称</td><td>
+          <span class="role-pill" th:text="${@viewLabels.role(user.role)}">作者</span>
+          <span class="muted" th:if="${user.id == viewer.id}">当前账号角色不可更改</span>
+          <form class="account-role-form" th:unless="${user.id == viewer.id}" th:action="@{/manage/users/{id}/role(id=${user.id})}" method="post">
+            <select name="role" aria-label="选择账号角色">
+              <option th:each="role : ${roles}" th:value="${role}" th:selected="${role == user.role}" th:text="${@viewLabels.role(role)}">作者</option>
+            </select>
+            <button type="submit" class="button button-quiet">更新角色</button>
+          </form>
+        </td>
+        <td><span class="role-pill" th:text="${user.enabled} ? '已启用' : '已停用'">已启用</span></td>
+        <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">日期</td>
+        <td>
+          <span class="muted" th:if="${user.enabled and user.id == viewer.id}">当前账号</span>
+          <form th:unless="${user.enabled and user.id == viewer.id}" th:action="@{/manage/users/{id}/enabled(id=${user.id})}" method="post">
+            <input type="hidden" name="enabled" th:value="${!user.enabled}">
+            <button type="submit" th:class="${user.enabled} ? 'button button-danger' : 'button button-quiet'"
+                    th:text="${user.enabled} ? '停用账号' : '启用账号'">停用账号</button>
+          </form>
+        </td></tr></tbody>
     </table></div>
   </section>
 </main>

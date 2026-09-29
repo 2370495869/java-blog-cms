@@ -15,7 +15,8 @@
   </article>
   <section class="panel decision-panel">
     <div><p class="eyebrow">YOUR DECISION</p><h2>审核结果</h2><p class="muted">发布后文章会出现在公开列表和搜索结果中。</p></div>
-    <div class="decision-actions">
+    <div class="alert alert-warning" th:if="${!canReview}" th:text="${reviewBlockReason}">当前用户不能审核本次投稿。</div>
+    <div class="decision-actions" th:if="${canReview}">
       <form th:action="@{/manage/review/{id}/publish(id=${article.id})}" method="post"><button class="button button-primary" type="submit">通过并发布</button></form>
       <form th:action="@{/manage/review/{id}/reject(id=${article.id})}" method="post" th:object="${reviewForm}" class="reject-form">
         <label>退回说明<input type="text" th:field="*{note}" maxlength="200" required placeholder="告诉作者需要修改的内容"></label>

@@ -6,6 +6,7 @@ import com.blogcms.security.CmsUserDetails;
 import com.blogcms.service.ArticleWorkflowService;
 import com.blogcms.service.CatalogService;
 import com.blogcms.service.MarkdownRenderer;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -70,11 +71,12 @@ public class PublicController {
     }
 
     @GetMapping("/login")
-    public String login(@RequestParam(defaultValue = "false") boolean error,
-                        @RequestParam(defaultValue = "false") boolean logout,
-                        Model model) {
-        model.addAttribute("loginError", error);
-        model.addAttribute("loggedOut", logout);
+    public String login(HttpServletRequest request, Model model) {
+        model.addAttribute("loginError", request.getParameterMap().containsKey("error"));
+        model.addAttribute("loggedOut", request.getParameterMap().containsKey("logout"));
+        model.addAttribute("registered", request.getParameterMap().containsKey("registered"));
+        model.addAttribute("disabled", request.getParameterMap().containsKey("disabled"));
+        model.addAttribute("roleChanged", request.getParameterMap().containsKey("roleChanged"));
         return "login";
     }
 }
