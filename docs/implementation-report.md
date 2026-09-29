@@ -32,6 +32,7 @@
 - 按要求删除旧远端仓库后，重新创建了公开仓库：[java-blog-cms](https://github.com/2370495869/java-blog-cms)。
 - 新 `main` 历史从提交 `a206da940c92e427a42d75166fe2d2263f986735` 开始；该根提交及本报告更新均使用当前 GitHub 登录账号 `2370495869` 的 ID 型 `noreply` 身份。GitHub contributors API 确认贡献者只有该账号，没有 Codex 或其他账号。
 - 重建发布前重新检查了 69 个受跟踪文件：未发现敏感凭据模式、`.env`、本机数据库、上传目录、日志或构建产物；只操作了当前项目仓库。
+- 2026-09-29 本次报告更新前通过 GitHub API 复核：公开仓库的默认分支 `main` 指向 `39095925495ab91376035e7718a496407e85bb99`（`Complete account and content workflows`），提交作者为账号 `2370495869`。该提交对应的 `Build and test` 运行 #1 已完成且成功：[查看 Actions 记录](https://github.com/2370495869/java-blog-cms/actions/runs/36536754897)。这是本次文档提交前的状态快照；后续提交和工作流结果以 GitHub 当前记录为准。
 
 ## 运行数据和安全边界
 
